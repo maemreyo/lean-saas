@@ -1,4 +1,4 @@
-// UPDATED: 2025-06-30 - Created user-management edge function for user operations
+// Created user-management edge function for user operations
 
 import { serve } from 'https://deno.land/std@0.208.0/http/server.ts'
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.4'

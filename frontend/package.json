@@ -8,7 +8,6 @@
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
-    "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     
@@ -55,7 +54,29 @@
     "update:deps": "npm-check-updates -u && pnpm install",
     
     "prepare": "husky install",
-    "postinstall": "prisma generate || true"
+    "postinstall": "prisma generate || true",
+
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "tsc --noEmit --watch",
+    "type-check:deno": "cd ../supabase/functions && deno check **/*.ts",
+    
+    "dev:full": "concurrently \"pnpm dev\" \"pnpm functions:serve\"",
+    "dev:db": "supabase start && pnpm dev",
+    
+    "test:type-check": "pnpm type-check && pnpm type-check:deno",
+    "test:all": "pnpm test && pnpm type-check && pnpm lint",
+    
+    "lint:frontend": "next lint",
+    "lint:deno": "cd ../supabase/functions && deno lint",
+    "lint:all": "pnpm lint:frontend && pnpm lint:deno",
+    
+    "format:frontend": "prettier --write ./src",
+    "format:deno": "cd ../supabase/functions && deno fmt",
+    "format:all": "pnpm format:frontend && pnpm format:deno",
+    
+    "setup:workspace": "node scripts/setup-workspace.js",
+    "check:config": "node scripts/check-config.js",
+    "doctor": "pnpm check:config && pnpm type-check:deno && pnpm lint:all"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -116,6 +137,9 @@
     "npm-check-updates": "^16.14.12",
     
     "@next/bundle-analyzer": "^14.0.4",
-    "webpack-bundle-analyzer": "^4.10.1"
+    "webpack-bundle-analyzer": "^4.10.1",
+
+    "concurrently": "^8.2.2",
+    "tsx": "^4.7.0"
   }
 }
