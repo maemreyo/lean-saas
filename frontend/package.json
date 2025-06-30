@@ -1,13 +1,14 @@
 {
-  "name": "frontend",
+  "name": "frontend", 
   "version": "0.1.0",
   "private": true,
-"scripts": {
+  "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     
@@ -22,16 +23,20 @@
     "db:reset": "supabase db reset",
     "db:migrate": "supabase db push",
     "db:seed": "supabase db seed",
-    "db:generate-types": "supabase gen types typescript --local > shared/types/supabase.ts",
+    "db:generate-types": "supabase gen types typescript --local > ../shared/types/supabase.ts",
     
     "functions:serve": "supabase functions serve",
     "functions:deploy": "supabase functions deploy",
     "functions:deploy:send-email": "supabase functions deploy send-email",
     "functions:deploy:user-management": "supabase functions deploy user-management",
+    "functions:deploy:billing-processor": "supabase functions deploy billing-processor",
+    "functions:deploy:stripe-webhook": "supabase functions deploy stripe-webhook",
+    "functions:deploy:quota-reset": "supabase functions deploy quota-reset",
     
     "setup:dev": "node scripts/setup-dev.js",
     "setup:env": "node scripts/setup-env.js",
     "setup:hooks": "husky install",
+    "setup:billing": "node scripts/setup-advanced-billing.js",
     
     "clean": "rimraf .next dist coverage",
     "clean:all": "rimraf .next dist coverage node_modules",
@@ -53,30 +58,7 @@
     "check:deps": "npm-check-updates",
     "update:deps": "npm-check-updates -u && pnpm install",
     
-    "prepare": "husky install",
-    "postinstall": "prisma generate || true",
-
-    "type-check": "tsc --noEmit",
-    "type-check:watch": "tsc --noEmit --watch",
-    "type-check:deno": "cd ../supabase/functions && deno check **/*.ts",
-    
-    "dev:full": "concurrently \"pnpm dev\" \"pnpm functions:serve\"",
-    "dev:db": "supabase start && pnpm dev",
-    
-    "test:type-check": "pnpm type-check && pnpm type-check:deno",
-    "test:all": "pnpm test && pnpm type-check && pnpm lint",
-    
-    "lint:frontend": "next lint",
-    "lint:deno": "cd ../supabase/functions && deno lint",
-    "lint:all": "pnpm lint:frontend && pnpm lint:deno",
-    
-    "format:frontend": "prettier --write ./src",
-    "format:deno": "cd ../supabase/functions && deno fmt",
-    "format:all": "pnpm format:frontend && pnpm format:deno",
-    
-    "setup:workspace": "node scripts/setup-workspace.js",
-    "check:config": "node scripts/check-config.js",
-    "doctor": "pnpm check:config && pnpm type-check:deno && pnpm lint:all"
+    "prepare": "husky install"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
@@ -84,6 +66,7 @@
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-progress": "^1.1.1",
     "@radix-ui/react-select": "^2.2.5",
     "@radix-ui/react-tabs": "^1.1.12",
     "@radix-ui/react-toast": "^1.2.14",
@@ -123,7 +106,7 @@
     "typescript": "^5.3.3",
     "eslint-config-prettier": "^9.1.0",
     
-    "@testing-library/react": "^14.1.2",
+    "@testing-library/react": "^16.0.1",
     "@testing-library/jest-dom": "^6.1.6",
     "@testing-library/user-event": "^14.5.1",
     "jest": "^29.7.0",
@@ -137,9 +120,10 @@
     "npm-check-updates": "^16.14.12",
     
     "@next/bundle-analyzer": "^14.0.4",
-    "webpack-bundle-analyzer": "^4.10.1",
-
-    "concurrently": "^8.2.2",
-    "tsx": "^4.7.0"
+    "webpack-bundle-analyzer": "^4.10.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0"
   }
 }
