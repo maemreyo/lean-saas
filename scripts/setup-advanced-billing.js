@@ -53,6 +53,24 @@ async function checkPrerequisites() {
       process.exit(1)
     }
   }
+  
+  // Check if Docker is running
+  try {
+    execSync('docker info', { stdio: 'pipe' })
+    logSuccess('Docker is running')
+  } catch (error) {
+    logWarning('Docker does not appear to be running')
+    log('Please start Docker Desktop before continuing')
+    
+    // Ask user if they want to continue anyway
+    log('\nDo you want to continue anyway? (y/n)')
+    const response = execSync('read -n 1 -p "" && echo $REPLY', { encoding: 'utf8', stdio: 'inherit' }).trim().toLowerCase()
+    
+    if (response !== 'y') {
+      log('Exiting setup. Please start Docker and run the script again.')
+      process.exit(1)
+    }
+  }
 }
 
 async function checkEnvironmentVariables() {
@@ -125,14 +143,55 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
   }
 }
 
-async function runDatabaseMigrations() {
-  logStep(3, 'Running database migrations...')
+async function checkSupabaseSetup() {
+  logStep(3, 'Checking Supabase setup...')
   
   try {
     // Check if Supabase is running
     execSync('supabase status', { stdio: 'pipe' })
     logSuccess('Supabase is running')
+  } catch (error) {
+    logWarning('Supabase is not running')
+    log('Starting Supabase...')
     
+    try {
+      execSync('supabase start', { stdio: 'inherit' })
+      logSuccess('Supabase started successfully')
+    } catch (startError) {
+      logError('Failed to start Supabase')
+      log('Please ensure Docker is running and try again')
+      throw startError
+    }
+  }
+  
+  // Check if project is linked
+  let isLinked = false
+  try {
+    const linkOutput = execSync('supabase link --project-ref local', { stdio: 'pipe', encoding: 'utf8' })
+    if (linkOutput.includes('Project linked')) {
+      isLinked = true
+      logSuccess('Supabase project is already linked')
+    }
+  } catch (error) {
+    // Project not linked, we'll link it below
+  }
+  
+  if (!isLinked) {
+    try {
+      log('Linking Supabase project...')
+      execSync('supabase link --project-ref local', { stdio: 'inherit' })
+      logSuccess('Supabase project linked successfully')
+    } catch (linkError) {
+      logError('Failed to link Supabase project')
+      throw linkError
+    }
+  }
+}
+
+async function runDatabaseMigrations() {
+  logStep(4, 'Running database migrations...')
+  
+  try {
     // Run the advanced billing migration
     log('Running advanced billing migration...')
     execSync('supabase db push', { stdio: 'inherit' })
@@ -145,30 +204,20 @@ async function runDatabaseMigrations() {
     
   } catch (error) {
     logError('Database migration failed')
-    log('Please ensure Supabase is running with: supabase start')
+    log('Please ensure Supabase is properly set up and linked')
     throw error
   }
 }
 
 async function installDependencies() {
-  logStep(4, 'Installing dependencies...')
+  logStep(5, 'Installing dependencies...')
   
   try {
     log('Installing frontend dependencies...')
     
-    // Check if we're in a git repository for husky
-    let isGitRepo = true
-    try {
-      execSync('git rev-parse --git-dir', { stdio: 'pipe' })
-    } catch {
-      isGitRepo = false
-      log('Not in a git repository - skipping husky setup')
-    }
-    
-    // Install with specific flags to handle warnings
-    const installCommand = isGitRepo 
-      ? 'cd frontend && pnpm install --silent'
-      : 'cd frontend && pnpm install --silent --ignore-scripts'
+    // Always use --ignore-scripts to avoid husky issues
+    log('Using --ignore-scripts to avoid husky installation issues')
+    const installCommand = 'cd frontend && pnpm install --silent --ignore-scripts'
     
     execSync(installCommand, { stdio: 'inherit' })
     logSuccess('Frontend dependencies installed')
@@ -176,21 +225,25 @@ async function installDependencies() {
     // Fix peer dependency warnings if they exist
     try {
       log('Checking for peer dependency issues...')
-      execSync('cd frontend && pnpm install @testing-library/react@^14.0.0 --save-dev', { stdio: 'pipe' })
+      execSync('cd frontend && pnpm install @testing-library/react@^14.0.0 --save-dev --ignore-scripts', { stdio: 'pipe' })
     } catch {
       // Ignore if this fails, it's not critical
     }
     
+    // Inform user about husky
+    logWarning('Husky git hooks were not installed due to --ignore-scripts flag')
+    log('This is normal and won\'t affect the functionality of the application')
+    
   } catch (error) {
     logError('Failed to install dependencies')
-    log('You can install them manually with: cd frontend && pnpm install')
+    log('You can install them manually with: cd frontend && pnpm install --ignore-scripts')
     logWarning('Some warnings are normal and don\'t affect functionality')
     // Don't throw error here, let setup continue
   }
 }
 
 async function deployEdgeFunctions() {
-  logStep(5, 'Deploying edge functions...')
+  logStep(6, 'Deploying edge functions...')
   
   try {
     const functions = [
@@ -212,7 +265,7 @@ async function deployEdgeFunctions() {
 }
 
 async function generateTypes() {
-  logStep(6, 'Generating TypeScript types...')
+  logStep(7, 'Generating TypeScript types...')
   
   try {
     execSync('cd frontend && pnpm db:generate-types', { stdio: 'inherit' })
@@ -224,7 +277,7 @@ async function generateTypes() {
 }
 
 async function setupStripeWebhook() {
-  logStep(7, 'Setting up Stripe webhook...')
+  logStep(8, 'Setting up Stripe webhook...')
   
   log('\n' + COLORS.yellow + 'MANUAL SETUP REQUIRED:' + COLORS.reset)
   log('Please configure your Stripe webhook manually:')
@@ -244,7 +297,7 @@ async function setupStripeWebhook() {
 }
 
 async function runTests() {
-  logStep(8, 'Running tests...')
+  logStep(9, 'Running tests...')
   
   try {
     log('Running type checks...')
@@ -298,18 +351,50 @@ async function main() {
     log('This script will set up the complete advanced billing module.')
     log('')
 
+    // Handle CLI arguments
+    const args = process.argv.slice(2)
+    const isDebug = args.includes('--debug')
+    const skipDeps = args.includes('--skip-deps')
+    const skipTests = args.includes('--skip-tests')
+    
+    // Set environment variables for debug mode
+    if (isDebug) {
+      log('Debug mode enabled - showing detailed error messages')
+      process.env.SUPABASE_DEBUG = 'true'
+    }
+
     await checkPrerequisites()
     await checkEnvironmentVariables()
-    await installDependencies()
+    await checkSupabaseSetup()
+    
+    if (!skipDeps) {
+      await installDependencies()
+    } else {
+      log('Skipping dependency installation (--skip-deps)')
+    }
+    
     await runDatabaseMigrations()
     await deployEdgeFunctions()
     await generateTypes()
-    await runTests()
+    
+    if (!skipTests) {
+      await runTests()
+    } else {
+      log('Skipping tests (--skip-tests)')
+    }
+    
     await setupStripeWebhook()
     await displayCompletionMessage()
 
   } catch (error) {
     logError('Setup failed: ' + error.message)
+    
+    // Show stack trace in debug mode
+    if (process.argv.includes('--debug')) {
+      log('\nError details:')
+      log(error.stack)
+    }
+    
     log('\nPlease fix the error above and run the script again.')
     process.exit(1)
   }
@@ -325,6 +410,7 @@ if (args.includes('--help') || args.includes('-h')) {
   log('')
   log('Options:')
   log('  --help, -h     Show this help message')
+  log('  --debug        Show detailed error messages')
   log('  --skip-deps    Skip dependency installation')
   log('  --skip-tests   Skip running tests')
   log('')
@@ -336,6 +422,7 @@ main()
 export default {
   checkPrerequisites,
   checkEnvironmentVariables,
+  checkSupabaseSetup,
   runDatabaseMigrations,
   installDependencies,
   deployEdgeFunctions,
