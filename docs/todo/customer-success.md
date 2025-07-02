@@ -144,29 +144,29 @@
 *Status:IN PROGRESS*
 
 #### RESTful Endpoints (Following Billing API Pattern: 18+ endpoints)
-- [ ] **Onboarding APIs:** (4 endpoints)
-  - [ ] `frontend/src/app/api/customer-success/onboarding/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/onboarding/[id]/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/onboarding/progress/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/onboarding/complete/route.ts`
-- [ ] **Feature Tour APIs:**
-  - [ ] `frontend/src/app/api/customer-success/tours/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/tours/[id]/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/tours/start/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/tours/complete/route.ts`
-- [ ] **Feedback APIs:**
-  - [ ] `frontend/src/app/api/customer-success/feedback/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/feedback/surveys/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/feedback/nps/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/feedback/export/route.ts`
-- [ ] **Support APIs:**
-  - [ ] `frontend/src/app/api/customer-success/support/tickets/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/support/tickets/[id]/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/support/knowledge-base/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/support/search/route.ts`
-- [ ] **Health Scoring APIs:**
-  - [ ] `frontend/src/app/api/customer-success/health/score/route.ts`
-  - [ ] `frontend/src/app/api/customer-success/health/risks/route.ts`
+- [x] **Onboarding APIs:** (4 endpoints) ✅
+  - [x] `frontend/src/app/api/customer-success/onboarding/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/onboarding/[id]/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/onboarding/progress/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/onboarding/complete/route.ts` ✅
+- [x] **Feature Tour APIs:** ✅
+  - [x] `frontend/src/app/api/customer-success/tours/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/tours/[id]/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/tours/start/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/tours/complete/route.ts` ✅
+- [x] **Feedback APIs:** ✅
+  - [x] `frontend/src/app/api/customer-success/feedback/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/feedback/surveys/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/feedback/nps/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/feedback/export/route.ts` ✅
+- [x] **Support APIs:** ✅
+  - [x] `frontend/src/app/api/customer-success/support/tickets/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/support/tickets/[id]/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/support/knowledge-base/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/support/search/route.ts` ✅
+- [ ] **Health Scoring APIs:** ✅
+  - [x] `frontend/src/app/api/customer-success/health/score/route.ts` ✅
+  - [x] `frontend/src/app/api/customer-success/health/risks/route.ts` ✅
   - [ ] `frontend/src/app/api/customer-success/health/trends/route.ts`
 - [ ] **Feature Adoption APIs:**
   - [ ] `frontend/src/app/api/customer-success/adoption/features/route.ts`
