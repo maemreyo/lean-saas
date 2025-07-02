@@ -1,7 +1,7 @@
 // UPDATED: 2025-06-30 - Enhanced Stripe webhook handler with advanced billing events
 
 import { stripe } from '@/lib/stripe/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 import { NextRequest, NextResponse } from 'next/server'
 import { headers } from 'next/headers'
 

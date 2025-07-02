@@ -1,7 +1,7 @@
 // UPDATED: 2025-06-30 - Created usage tracking API endpoint for metered billing
 
 import { createAuthClient } from '@/lib/auth/server'
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/lib/supabase/client'
 import { usageTrackingRequestSchema } from '@/shared/schemas/billing'
 import { advancedStripeUtils } from '@/lib/stripe/advanced'
 import { NextRequest, NextResponse } from 'next/server'
